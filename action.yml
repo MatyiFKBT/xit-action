@@ -1,0 +1,10 @@
+name: 'XIT to project action'
+description: 'Action to sync your xit file with your Github Project'
+inputs:
+  token:
+    description: 'The token to use to access the Github API'
+    required: true
+
+runs:
+  using: 'node16'
+  main: 'dist/index.js'
