@@ -7,8 +7,7 @@ const main = async () => {
 		 * We need to fetch all the inputs that were provided to our action
 		 * and store them in variables for us to use.
 		 **/
-		// const token = core.getInput('token', { required: true });
-		const token = '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'
+		const token = core.getInput('token', { required: true });
 
 		/**
 		 * Now we need to create an instance of Octokit which will use to call
@@ -39,7 +38,7 @@ const main = async () => {
 		let doneColumn;
 		
 		const project = projects.data.find(p => p.name === 'Default');
-		
+		core.setOutput('project', project);
 		if (!project) {
 			const { data: { id } } = octokit.rest.projects.createForRepo({
 				owner,
