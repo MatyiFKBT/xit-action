@@ -40,7 +40,7 @@ const main = async () => {
 		const project = projects.data.find(p => p.name === 'Default');
 		core.setOutput('project', project);
 		console.log({ project });
-		
+
 		if (!project) {
 			const { data: { id } } = octokit.rest.projects.createForRepo({
 				owner,
@@ -69,7 +69,7 @@ const main = async () => {
 			inProgressColumn = columns.data.find(c => c.name === 'In progress');
 			doneColumn = columns.data.find(c => c.name === 'Done');
 		}
-
+		console.log('if-en tul')
 		const toDoCards = await octokit.rest.projects.listCards({
 			column_id: toDoColumn.id
 		});
