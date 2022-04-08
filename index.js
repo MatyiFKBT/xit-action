@@ -33,16 +33,42 @@ const main = async () => {
 			owner,
 			repo
 		});
+		
+		let toDoColumn;
+		let inProgressColumn;
+		let doneColumn;
+		
 		const project = projects.data.find(p => p.name === 'Default');
-		const columns = await octokit.rest.projects.listColumns({
-			project_id: project.id
-		});
 		
-		console.log(project.id)
-		const toDoColumn = columns.data.find(c => c.name === 'To do');
-		const inProgressColumn = columns.data.find(c => c.name === 'In progress');
-		const doneColumn = columns.data.find(c => c.name === 'Done');
-		
+		if (!project) {
+			const { data: { id } } = octokit.rest.projects.createForRepo({
+				owner,
+				repo,
+				name: 'Default',
+			});
+			const { data: toDoColumn } = await octokit.rest.projects.createColumn({
+				project_id: id,
+				name: 'To do'
+			});
+			const { data: inProgressColumn } = await octokit.rest.projects.createColumn({
+				project_id: id,
+				name: 'In progress'
+			});
+			const { data: doneColumn } = await octokit.rest.projects.createColumn({
+				project_id: id,
+				name: 'Done'
+			});
+		} else {
+			const columns = await octokit.rest.projects.listColumns({
+				project_id: project.id
+			});
+
+			console.log(columns)
+			toDoColumn = columns.data.find(c => c.name === 'To do');
+			inProgressColumn = columns.data.find(c => c.name === 'In progress');
+			doneColumn = columns.data.find(c => c.name === 'Done');
+		}
+
 		const toDoCards = await octokit.rest.projects.listCards({
 			column_id: toDoColumn.id
 		});
@@ -53,9 +79,11 @@ const main = async () => {
 			column_id: doneColumn.id
 		});
 		const allCards = [...toDoCards.data, ...inProgressCards.data, ...doneCards.data];
-		await Promise.all(allCards.map(card => {octokit.rest.projects.deleteCard({
-			card_id: card.id
-		})}))
+		await Promise.all(allCards.map(card => {
+			octokit.rest.projects.deleteCard({
+				card_id: card.id
+			})
+		}))
 
 		const parsed = Buffer.from(content, 'base64').toString('utf8');
 		let promises = [];
@@ -91,9 +119,9 @@ const main = async () => {
 			}
 			promises.push(
 				octokit.rest.projects.createCard({
-				column_id,
-				note: value
-			})
+					column_id,
+					note: value
+				})
 			)
 			core.setOutput(status, value);
 		})
