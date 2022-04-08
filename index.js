@@ -19,7 +19,7 @@ const main = async () => {
 		 **/
 		const octokit = new github.getOctokit(token);
 
-		const owner = github.context.repo.owner || core.getInput('owner');
+		const owner = github.context.repo.owner || core.getInput('user');
 		const repo = github.context.repo.repo || core.getInput('repo');
 		const { data: { content } } = await octokit.rest.repos.getContent({
 			owner,
@@ -39,6 +39,8 @@ const main = async () => {
 		
 		const project = projects.data.find(p => p.name === 'Default');
 		core.setOutput('project', project);
+		console.log({ project });
+		
 		if (!project) {
 			const { data: { id } } = octokit.rest.projects.createForRepo({
 				owner,
