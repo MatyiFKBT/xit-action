@@ -7,7 +7,7 @@ jobs:
     name: Annotates pull request with metadata
     steps:
       - name: Sync todos
-        uses: matyifkbt/xit-action@master
+        uses: matyifkbt/xit-action@dev
         with:
           owner: ${{ github.repository_owner }}
           repo: ${{ github.event.repository.name }}

@@ -4,6 +4,12 @@ inputs:
   token:
     description: 'The token to use to access the Github API'
     required: true
+  user:
+    description: 'The user whose repo you want to sync'
+    required: false
+  repo:
+    description: 'The repo to run on'
+    required: false
 
 runs:
   using: 'node16'
