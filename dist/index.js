@@ -8483,9 +8483,9 @@ const main = async () => {
 		const repo = core.getInput('repo') || github.context.repo.repo ;
 		const path = core.getInput('path') || 'todos.xit'
 		const { data: { content } } = await octokit.rest.repos.getContent({
-			owner:'matyifkbt',
-			repo:'xit-action',
-			path:'a.xit'
+			owner,
+			repo,
+			path
 		});
 
 		// get all cards from default github project, if there's one
