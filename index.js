@@ -120,10 +120,10 @@ const main = async () => {
 					note: value
 				})
 			)
-			core.setOutput(status, value);
+			// core.setOutput(status, value);
 		})
 		await Promise.all(promises);
-
+		core.info(`Done! 🎉`);
 	} catch (error) {
 		core.setFailed(error.message);
 	}
