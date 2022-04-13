@@ -13,7 +13,7 @@ inputs:
   path:
     description: 'The path to the .xit file. '
     required: true
-    default: './todos.xit'
+    default: 'todos.xit'
 runs:
   using: 'node16'
   main: 'dist/index.js'
