@@ -4,11 +4,9 @@ on:
 jobs:
   sync-todos:
     runs-on: 'ubuntu-latest'
-    name: Annotates pull request with metadata
+    name: 'Sync todos'
     steps:
       - name: Sync todos
         uses: matyifkbt/xit-action@dev
         with:
-          user: ${{ github.repository_owner }}
-          repo: ${{ github.event.repository.name }}
           token: ${{ secrets.GITHUB_TOKEN }}

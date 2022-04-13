@@ -3,31 +3,19 @@ const github = require('@actions/github');
 
 const main = async () => {
 	try {
-		/**
-		 * We need to fetch all the inputs that were provided to our action
-		 * and store them in variables for us to use.
-		 **/
 		const token = core.getInput('token', { required: true })
-		// const token='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'
-
 		/**
-		 * Now we need to create an instance of Octokit which will use to call
-		 * GitHub's REST API endpoints.
-		 * We will pass the token as an argument to the constructor. This token
-		 * will be used to authenticate our requests.
-		 * You can find all the information about how to use Octokit here:
 		 * https://octokit.github.io/rest.js/v18
 		 **/
 		const octokit = new github.getOctokit(token);
 
-		const owner = github.context.repo.owner || core.getInput('user');
-		const repo = github.context.repo.repo || core.getInput('repo');
-		// const owner = 'matyifkbt';
-		// const repo = 'xit-action';
+		const owner = core.getInput('user') || github.context.repo.owner;
+		const repo = core.getInput('repo') || github.context.repo.repo ;
+		const path = core.getInput('path') || 'todos.xit'
 		const { data: { content } } = await octokit.rest.repos.getContent({
-			owner,
-			repo,
-			path: 'todos.xit'
+			owner:'matyifkbt',
+			repo:'xit-action',
+			path:'a.xit'
 		});
 
 		// get all cards from default github project, if there's one
@@ -41,11 +29,9 @@ const main = async () => {
 		let doneColumn;
 		
 		const project = projects.data.find(p => p.name === 'Default');
-		core.setOutput('project', project);
-		console.log({ project });
-
+		
 		if (!project) {
-			console.warn(`No default project found. Creating one...`);	
+			core.warning(`No default project found. Creating one...`);	
 			const { data: {id} } = await octokit.rest.projects.createForRepo({
 				owner,
 				repo,
@@ -74,12 +60,10 @@ const main = async () => {
 				project_id: project.id
 			});
 
-			console.log(columns)
 			toDoColumn = columns.data.find(c => c.name === 'To do');
 			inProgressColumn = columns.data.find(c => c.name === 'In progress');
 			doneColumn = columns.data.find(c => c.name === 'Done');
 		}
-		console.log('if-en tul')
 
 		const toDoCards = await octokit.rest.projects.listCards({
 			column_id: toDoColumn.id
@@ -91,7 +75,7 @@ const main = async () => {
 			column_id: doneColumn.id
 		});
 		const allCards = [...toDoCards.data, ...inProgressCards.data, ...doneCards.data];
-		console.log(allCards.length)
+		
 		await Promise.all(allCards.map(card => {
 			octokit.rest.projects.deleteCard({
 				card_id: card.id
