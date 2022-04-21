@@ -22,11 +22,11 @@ jobs:
     name: Sync .xit file to Default project
     steps:
       - name: Sync todos
-        uses: matyifkbt/xit-action@master
+        uses: matyifkbt/xit-action@v0.1
         with:
-          owner: ${{ github.repository_owner }}
           repo: ${{ github.event.repository.name }}
           token: ${{ secrets.GITHUB_TOKEN }}
+          path: tasks.xit # defaults to todos.xit
 ```
 
 
