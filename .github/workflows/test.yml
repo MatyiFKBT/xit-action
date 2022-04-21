@@ -1,0 +1,12 @@
+on:
+  push: 
+
+jobs:
+  sync-todos:
+    runs-on: 'ubuntu-latest'
+    name: 'Sync todos'
+    steps:
+      - name: Sync todos
+        uses: matyifkbt/xit-action@dev
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}

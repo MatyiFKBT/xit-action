@@ -4,7 +4,16 @@ inputs:
   token:
     description: 'The token to use to access the Github API'
     required: true
-
+  user:
+    description: 'The user whose repo you want to sync. Defaults to the current user'
+    required: false
+  repo:
+    description: 'The repo to run on. Defaults to the current repo'
+    required: false
+  path:
+    description: 'The path to the .xit file. '
+    required: true
+    default: 'todos.xit'
 runs:
   using: 'node16'
   main: 'dist/index.js'

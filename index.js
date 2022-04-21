@@ -3,29 +3,19 @@ const github = require('@actions/github');
 
 const main = async () => {
 	try {
+		const token = core.getInput('token', { required: true })
 		/**
-		 * We need to fetch all the inputs that were provided to our action
-		 * and store them in variables for us to use.
-		 **/
-		// const token = core.getInput('token', { required: true });
-		const token = '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'
-
-		/**
-		 * Now we need to create an instance of Octokit which will use to call
-		 * GitHub's REST API endpoints.
-		 * We will pass the token as an argument to the constructor. This token
-		 * will be used to authenticate our requests.
-		 * You can find all the information about how to use Octokit here:
 		 * https://octokit.github.io/rest.js/v18
 		 **/
 		const octokit = new github.getOctokit(token);
 
-		const owner = github.context.repo.owner || core.getInput('owner');
-		const repo = github.context.repo.repo || core.getInput('repo');
+		const owner = core.getInput('user') || github.context.repo.owner;
+		const repo = core.getInput('repo') || github.context.repo.repo ;
+		const path = core.getInput('path') || 'todos.xit'
 		const { data: { content } } = await octokit.rest.repos.getContent({
 			owner,
 			repo,
-			path: 'todos.xit'
+			path
 		});
 
 		// get all cards from default github project, if there's one
@@ -33,16 +23,48 @@ const main = async () => {
 			owner,
 			repo
 		});
+		
+		let toDoColumn;
+		let inProgressColumn;
+		let doneColumn;
+		
 		const project = projects.data.find(p => p.name === 'Default');
-		const columns = await octokit.rest.projects.listColumns({
-			project_id: project.id
-		});
 		
-		console.log(project.id)
-		const toDoColumn = columns.data.find(c => c.name === 'To do');
-		const inProgressColumn = columns.data.find(c => c.name === 'In progress');
-		const doneColumn = columns.data.find(c => c.name === 'Done');
-		
+		if (!project) {
+			core.warning(`No default project found. Creating one...`);	
+			const { data: {id} } = await octokit.rest.projects.createForRepo({
+				owner,
+				repo,
+				name: 'Default',
+			});
+
+			let todoResult = await octokit.rest.projects.createColumn({
+				project_id: id,
+				name: 'To do'
+			});
+			toDoColumn = todoResult.data
+
+			let inProgressResult = await octokit.rest.projects.createColumn({
+				project_id: id,
+				name: 'In progress'
+			})
+			inProgressColumn = inProgressResult.data
+			
+			let doneResult = await octokit.rest.projects.createColumn({
+				project_id: id,
+				name: 'Done'
+			})
+			doneColumn = doneResult.data
+		} else {
+			const columns = await octokit.rest.projects.listColumns({
+				project_id: project.id
+			});
+
+			toDoColumn = columns.data.find(c => c.name === 'To do');
+			inProgressColumn = columns.data.find(c => c.name === 'In progress');
+			doneColumn = columns.data.find(c => c.name === 'Done');
+		}
+
 		const toDoCards = await octokit.rest.projects.listCards({
 			column_id: toDoColumn.id
 		});
@@ -53,9 +75,12 @@ const main = async () => {
 			column_id: doneColumn.id
 		});
 		const allCards = [...toDoCards.data, ...inProgressCards.data, ...doneCards.data];
-		await Promise.all(allCards.map(card => {octokit.rest.projects.deleteCard({
-			card_id: card.id
-		})}))
+		
+		await Promise.all(allCards.map(card => {
+			octokit.rest.projects.deleteCard({
+				card_id: card.id
+			})
+		}))
 
 		const parsed = Buffer.from(content, 'base64').toString('utf8');
 		let promises = [];
@@ -91,14 +116,14 @@ const main = async () => {
 			}
 			promises.push(
 				octokit.rest.projects.createCard({
-				column_id,
-				note: value
-			})
+					column_id,
+					note: value
+				})
 			)
-			core.setOutput(status, value);
+			// core.setOutput(status, value);
 		})
 		await Promise.all(promises);
-
+		core.info(`Done! 🎉`);
 	} catch (error) {
 		core.setFailed(error.message);
 	}
