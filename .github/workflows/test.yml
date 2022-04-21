@@ -7,6 +7,6 @@ jobs:
     name: 'Sync todos'
     steps:
       - name: Sync todos
-        uses: matyifkbt/xit-action@dev
+        uses: matyifkbt/xit-action@v0.1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
